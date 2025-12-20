@@ -1,5 +1,4 @@
 import copy
-import math
 
 import numpy as np
 from scipy.optimize import minimize
@@ -15,7 +14,7 @@ def rebalance(portfolio, target_allocation):
 
     Returns:
         (tuple): tuple containing:
-            * new_units (Dict[str, int]): Units of each asset to buy. The keys of the dictionary are the tickers of the assets.
+            * new_units (Dict[str, float]): Units of each asset to buy. The keys of the dictionary are the tickers of the assets.
             * prices (Dict[str, [float, str]]): The keys of the dictionary are the tickers of the assets. Each value of the dictionary is a 2-entry list. The first entry is the price of the asset during the rebalancing computation. The second entry is the currency of the asset.
             * cost (Dict[str, float]): Market value of each asset to buy. The keys of the dictionary are the tickers of the assets.
             * exchange_rates (Dict[str, float]): The keys of the dictionary are currencies. Each value is the exchange rate to CAD during the rebalancing computation.
@@ -44,14 +43,13 @@ def rebalance(portfolio, target_allocation):
     for sol_mv, ticker in zip(to_buy_vals,
                               balanced_portfolio.assets.keys()):
         if portfolio.selling_allowed:
-            new_units[ticker] = math.floor(
-                (sol_mv - portfolio.assets[ticker].market_value_in(
-                    cmn_curr)) / portfolio.assets[ticker].price_in(
-                        cmn_curr))
+            new_units[ticker] = (
+                sol_mv - portfolio.assets[ticker].market_value_in(cmn_curr)
+            ) / portfolio.assets[ticker].price_in(cmn_curr)
         else:
-            new_units[ticker] = math.floor(
-                sol_mv /
-                portfolio.assets[ticker].price_in(cmn_curr))
+            new_units[ticker] = sol_mv / portfolio.assets[ticker].price_in(
+                cmn_curr
+            )
 
         asset_i = portfolio.assets[ticker]
         if asset_i.currency not in currency_cost:
