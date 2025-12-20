@@ -262,6 +262,24 @@ class Portfolio:
                 * max_diff (float): Largest difference between target allocation and optimized asset allocation.
         """
 
+        asset_tickers = set(self.assets.keys())
+        target_tickers = set(target_allocation.keys())
+        missing_in_assets = sorted(target_tickers - asset_tickers)
+        missing_in_target = sorted(asset_tickers - target_tickers)
+        if missing_in_assets or missing_in_target:
+            details = ["target_allocation does not match portfolio assets."]
+            if missing_in_assets:
+                details.append(
+                    "Tickers in YAML but not in CSV assets: "
+                    + ", ".join(missing_in_assets)
+                )
+            if missing_in_target:
+                details.append(
+                    "Tickers in CSV assets but not in YAML: "
+                    + ", ".join(missing_in_target)
+                )
+            raise ValueError(" ".join(details))
+
         # order target_allocation dict in the same order as assets dict and upper key
         target_allocation_reordered = {}
         try:
