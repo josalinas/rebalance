@@ -5,7 +5,7 @@ Rebalance
 
 A calculator which tells you how to split your investment amongst your portfolio's assets based on your target asset allocation.
 
-To use it, install the package and write a driver file as described below.
+To use it, install the package and run the provided ``main.py`` driver file as described below.
 
 
 .. raw:: html
@@ -43,95 +43,33 @@ To use it, install the package and write a driver file as described below.
         <h2 class="ui dividing header">Example</h2>
 
 
-                    <h3 class="ui header">Make a driver file:</h3>
+                    <h3 class="ui header">Create a YAML config:</h3>
 
-                    <p> The driver file is where we create our portfolio. We specify all of its assets and the available cash we have to invest. </p>
-		    <p> Follow the steps below for a detailed description. Alternatively, you can simply modify
-		    <a href="https://github.com/siavashadpey/rebalance/blob/master/rebalance/portfolio_examply.py/">the example driver file</a>.
+                    <p>The driver reads a YAML config that points to a CSV export of your positions and supplies cash plus target allocations.</p>
+
+.. code-block:: yaml
+
+    positions_csv: Portfolio_Positions_Dec-19-2025.csv
+    target_asset_alloc:
+      FTEC: 30
+      FNCMX: 25
+      SOXX: 25
+      FITLX: 20
+    cash_amounts: [3000.0]
+    cash_currency: ["USD"]
+
+.. raw:: html
+
+                    <p>The CSV needs "Symbol" and "Quantity" columns. Rows below the main table are ignored once the Symbol is empty, and the Symbol "SPAXX**" is always discarded.</p>
+
+.. raw:: html
+
+                    <h3 class="ui header">Run the driver:</h3>
 
 .. code-block:: bash
 
     cd rebalance
-    touch driver_file.py
-
-.. raw:: html
-
-                    <h3 class="ui header">Import all necessary packages:</h3>
-
-.. code-block:: python
-
-    from rebalance import Portfolio
-
-.. raw:: html
-
-                    <h3 class="ui header">First we create our portfolio:</h3>
-
-.. code-block:: python
-
-    # My portfolio
-    p = Portfolio()
-
-.. raw:: html
-
-                    <h3 class="ui header">Then we add our assets:</h3>
-                    <p> We must specify the ticker symbol and the quantity of each asset we currently have in our portfolio.</p>
-		    <p></p>
-		    <i>The portfolio used in this example is one of 
-		    	<a href="https://www.canadianportfoliomanagerblog.com/model-etf-portfolios/">
-		    	Canadian Portfolio Manager</a>'s model portfolios. This blog along with 
-		    	<a href="https://canadiancouchpotato.com/getting-started/">Canadian Couch Potato</a>
-			advocate low-cost, globally diversified index funds for DIY investors. </i>
-
-.. code-block:: python
-
-    # Assets in portfolio
-    # The price will be retrieved automatically
-    tickers = ["XBB.TO",   # iShares Core Canadian Universe Bond Index ETF
-    	       "XIC.TO",   # iShares Core S&P/TSX Capped Composite Index ETF
-	       "ITOT",     # iShares Core S&P Total U.S. Stock Market ETF
-	       "IEFA",     # iShares Core MSCI EAFE ETF
-	       "IEMG"]     # iShares Core MSCI Emerging Markets ETF
-    quantities = [36, 64, 32, 8, 7]
-    p.easy_add_assets(tickers=tickers, quantities=quantities)
-
-.. raw:: html
-
-                    <h3 class="ui header">We also need to add cash to our portfolio: </h3>
-                    <p> This is the amount that we are investing. We can add cash in different currencies.</p>
-
-.. code-block:: python
-
-    # Cash in portfolio
-    cash_amounts = [3000., 200.]
-    cash_currency = ["USD", "CAD"]
-    p.easy_add_cash(amounts=cash_amounts, currencies=cash_currency)
-
-.. raw:: html
-
-                    <h3 class="ui header">Finally, we need to specify our target asset allocation:</h3>
-		    <i> The target asset allocation used in this example is that of an
-		         aggressive portfolio with 80% equities and 20% bonds (XBB.TO). </i>
-
-.. code-block:: python
-
-    # Target asset allocation (in %)
-    target_asset_alloc = {
-    "XBB.TO": 20,
-    "XIC.TO": 20,
-    "ITOT":   36,
-    "IEFA":   20,
-    "IEMG":    4
-    }
-
-.. raw:: html
-
-                    <h3 class="ui header">Let the optimizer rebalance our portfolio!</h3>
-
-.. code-block:: python
-
-    # rebalance
-    p.selling_allowed = False # We don't want to sell any of our assets for this case
-    p.rebalance(target_asset_alloc, verbose=True)
+    python main.py portfolio.yaml
 
 .. raw:: html
 

@@ -1,0 +1,8 @@
+positions_csv: Portfolio_Positions_Dec-19-2025.csv
+target_asset_alloc:
+  FTEC: 30
+  FNCMX: 25
+  SOXX: 25
+  FITLX: 20
+cash_amounts: [3000.0]
+cash_currency: ["USD"]

@@ -302,7 +302,7 @@ class Portfolio:
                 "---------------------------------------------------------------------------------------------------------------"
             )
             for ticker in balanced_portfolio.assets:
-                print("%8s  %7.2f   %6.d        %8.2f     %4s          %5.2f            %5.2f               %5.2f" % \
+                print("%8s  %7.2f   %7.3f        %8.2f     %4s          %5.2f            %5.2f               %5.2f" % \
                 (ticker, prices[ticker][0], new_units[ticker], cost[ticker], prices[ticker][1], \
                  old_alloc[ticker], new_alloc[ticker], target_allocation[ticker]))
 

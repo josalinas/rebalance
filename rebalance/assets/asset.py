@@ -1,3 +1,5 @@
+import numbers
+
 from rebalance import Price
 
 import yfinance as yf
@@ -16,11 +18,12 @@ class Asset:
 
         Args:
             ticker (str): Ticker of the asset.
-            quantity (int, optional): Number of units of the asset. Default is zero.
+            quantity (float, optional): Number of units of the asset. Default is zero.
         """
 
         assert ticker is not None, "ticker symbol is a mandatory argument."
-        assert isinstance(quantity, int), "quantity must be integer."
+        assert isinstance(quantity, numbers.Real) and not isinstance(quantity, bool), \
+            "quantity must be a real number."
 
         self._ticker = ticker
         self._quantity = quantity
@@ -31,12 +34,13 @@ class Asset:
 
     @property
     def quantity(self):
-        """ (int): Number of units of the asset. """
+        """ (float): Number of units of the asset. """
         return self._quantity
 
     @quantity.setter
     def quantity(self, quantity):
-        assert isinstance(quantity, int), "quantity must be integer."
+        assert isinstance(quantity, numbers.Real) and not isinstance(quantity, bool), \
+            "quantity must be a real number."
         self._quantity = quantity
 
     @property
@@ -95,7 +99,7 @@ class Asset:
         Buys (or sells) a specified amount of the asset.
 
         Args:
-            quantity (int): If positive, it is the quantity to buy. If negative, it is the quantity to sell.
+            quantity (float): If positive, it is the quantity to buy. If negative, it is the quantity to sell.
             currency (str, optional): Currency in which to obtain cost. Defaults to asset's own currency.
 
         Returns:
@@ -112,7 +116,7 @@ class Asset:
         Computes the cost to purchase the specified number of units.
 
         Args:
-            units (int): Units interested in purchasing.
+            units (float): Units interested in purchasing.
             currency (str, optional): Currency in which to convert the cost. Default is asset's own currency.
 
         Returns:
