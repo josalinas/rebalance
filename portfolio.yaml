@@ -6,12 +6,12 @@ target_asset_alloc:
     Bonds: 5
   Target2:
     Constraint: ["Stocks","Location"]
-    US: 55
-    INT: 45
+    US: 65
+    INT: 35
   Target3:
     Constraint: ["Stocks","US","MarketCap"]
-    Large: 70
-    Mid: 20
-    Small: 10
+    Large: 72
+    Mid: 19.5
+    Small: 8.5
 cash_amounts: [10000.0]
 cash_currency: ["USD"]
