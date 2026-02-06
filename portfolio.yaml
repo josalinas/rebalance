@@ -1,8 +1,17 @@
-positions_csv: Portfolio_Positions_Dec-19-2025.csv
+positions_csv: Portfolio_Positions_Feb-05-2026.csv
 target_asset_alloc:
-  FTEC: 30
-  FNCMX: 25
-  SOXX: 25
-  FITLX: 20
-cash_amounts: [3000.0]
+  Target1:
+    Constraint: ["Type"]
+    Stocks: 95
+    Bonds: 5
+  Target2:
+    Constraint: ["Stocks","Location"]
+    US: 55
+    INT: 45
+  Target3:
+    Constraint: ["Stocks","US","MarketCap"]
+    Large: 70
+    Mid: 20
+    Small: 10
+cash_amounts: [10000.0]
 cash_currency: ["USD"]

@@ -58,23 +58,27 @@ def parse_quantity(raw_value):
 def read_positions(csv_path):
     tickers = []
     quantities = []
+    metadata = {}
+    skip_columns = {"Symbol", "Quantity", ""}
     with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         if not reader.fieldnames:
             raise ValueError(f"No headers found in {csv_path}.")
         reader.fieldnames = [name.strip() if name else "" for name in reader.fieldnames]
+        meta_columns = [c for c in reader.fieldnames if c not in skip_columns]
         for row in reader:
             symbol = (row.get("Symbol") or "").strip()
             if not symbol:
                 break
-            if symbol.upper() == "SPAXX**":
-                continue
             quantity = parse_quantity(row.get("Quantity"))
             tickers.append(symbol)
             quantities.append(quantity)
+            metadata[symbol] = {
+                col: (row.get(col) or "").strip() for col in meta_columns
+            }
     if not tickers:
         raise ValueError(f"No tickers found in {csv_path}.")
-    return tickers, quantities
+    return tickers, quantities, metadata
 
 
 def get_cash_config(config):

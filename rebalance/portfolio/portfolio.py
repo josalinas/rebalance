@@ -245,14 +245,16 @@ class Portfolio:
         self.add_cash(to_amount, to_currency)
         self.add_cash(-from_amount, from_currency)
 
-    def rebalance(self, target_allocation, verbose=False):
+    def rebalance(self, target_allocation, groups=None, verbose=False):
         """
         Rebalances the portfolio using the specified target allocation, the portfolio's current allocation,
         and the available cash.
 
         Args:
             target_allocation (Dict[str, float]): Target asset allocation of the portfolio (in %). The keys of the dictionary are the tickers of the assets.
-            verbose (bool, optional): Verbosity flag. Default is False. 
+            groups (list[list[str]], optional): Leaf groups from the target tree.
+                When provided, the optimizer works at the group level.
+            verbose (bool, optional): Verbosity flag. Default is False.
 
         Returns:
             (tuple): tuple containing:
@@ -297,15 +299,28 @@ class Portfolio:
                    100.) <= 1E-2, "target allocation must sum up to 100%."
 
         # offload heavy work
-        (balanced_portfolio, new_units, prices, cost, exchange_history) = rebalancing_helper.rebalance(self, target_allocation_np)
+        (balanced_portfolio, new_units, prices, cost, exchange_history) = rebalancing_helper.rebalance(self, target_allocation_np, groups)
 
         # compute old and new asset allocation
         # and largest diff between new and target asset allocation
         old_alloc = self.asset_allocation()
         new_alloc = balanced_portfolio.asset_allocation()
-        max_diff = max(
-            abs(target_allocation_np -
-                np.fromiter(new_alloc.values(), dtype=float)))
+
+        # Compute max_diff at group level when groups are available.
+        if groups is not None:
+            new_alloc_vals = np.fromiter(new_alloc.values(), dtype=float)
+            tickers_list = list(self.assets.keys())
+            ticker_to_idx = {t: i for i, t in enumerate(tickers_list)}
+            max_diff = 0.0
+            for grp in groups:
+                idx = [ticker_to_idx[t] for t in grp]
+                group_target = sum(target_allocation_np[i] for i in idx)
+                group_actual = sum(new_alloc_vals[i] for i in idx)
+                max_diff = max(max_diff, abs(group_target - group_actual))
+        else:
+            max_diff = max(
+                abs(target_allocation_np -
+                    np.fromiter(new_alloc.values(), dtype=float)))
 
         if verbose:
             print("")
