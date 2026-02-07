@@ -1,4 +1,4 @@
-positions_csv: Portfolio_Positions_Feb-05-2026.csv
+positions_csv: Portfolio_Positions.csv
 target_asset_alloc:
   Target1:
     Constraint: ["Type"]
@@ -6,8 +6,8 @@ target_asset_alloc:
     Bonds: 5
   Target2:
     Constraint: ["Stocks","Location"]
-    US: 65
-    INT: 35
+    US: 55
+    INT: 45
   Target3:
     Constraint: ["Stocks","US","MarketCap"]
     Large: 72

@@ -172,7 +172,7 @@ def plot_rebalance(targets_info, metadata, flat_alloc, old_alloc, new_alloc,
     # --- Summary table data ---
     summary_tables = []
     summary_col_labels = [
-        "Category", "Amount ($)", "Currency",
+        "Category", "Tickers", "Amount ($)", "Currency",
         "Old (%)", "New (%)", "Target (%)"]
 
     for name, constraint, allocations in targets_info:
@@ -188,7 +188,7 @@ def plot_rebalance(targets_info, metadata, flat_alloc, old_alloc, new_alloc,
             cur = prices[cat_t[0]][1] if cat_t else ""
             ro = sum(old_alloc.get(t, 0.0) for t in cat_t) / scope_old * 100 if scope_old else 0
             rn = sum(new_alloc.get(t, 0.0) for t in cat_t) / scope_new * 100 if scope_new else 0
-            rows.append([cat, f"{amt:.2f}", cur,
+            rows.append([cat, ", ".join(cat_t), f"{amt:.2f}", cur,
                          f"{ro:.2f}", f"{rn:.2f}", f"{tgt_pct:.2f}"])
 
         title = f"{name}  --  Constraint: {constraint}"
@@ -196,13 +196,14 @@ def plot_rebalance(targets_info, metadata, flat_alloc, old_alloc, new_alloc,
 
     # --- Ticker table data ---
     ticker_col_labels = [
-        "Ticker", "Ask", "Qty to buy", "Amount ($)", "Currency",
+        "Ticker", "Description", "Ask", "Qty to buy", "Amount ($)", "Currency",
         "Old (%)", "New (%)", "Target (%)"]
     ticker_rows = []
     for ticker in portfolio.assets:
+        desc = metadata.get(ticker, {}).get("Description", "")
         cost = new_units[ticker] * prices[ticker][0]
         ticker_rows.append([
-            ticker, f"{prices[ticker][0]:.2f}", f"{new_units[ticker]:.3f}",
+            ticker, desc, f"{prices[ticker][0]:.2f}", f"{new_units[ticker]:.3f}",
             f"{cost:.2f}", prices[ticker][1],
             f"{old_alloc[ticker]:.2f}", f"{new_alloc[ticker]:.2f}",
             f"{flat_alloc[ticker]:.2f}"])

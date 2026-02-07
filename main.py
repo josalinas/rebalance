@@ -45,13 +45,13 @@ def _print_report(targets_info, metadata, flat_alloc, old_alloc, new_alloc,
         print("")
         print(f"  {name}  --  Constraint: {constraint}")
         print(
-            " Category        Amount    Currency    Old allocation   New allocation     Target allocation"
+            " Category   Tickers                      Amount    Currency    Old allocation   New allocation     Target allocation"
         )
         print(
-            "                    ($)                      (%)              (%)                 (%)"
+            "                                            ($)                      (%)              (%)                 (%)"
         )
         print(
-            "--------------------------------------------------------------------------------------------"
+            "--------------------------------------------------------------------------------------------------------------------"
         )
 
         for category, target_pct in allocations.items():
@@ -73,9 +73,10 @@ def _print_report(targets_info, metadata, flat_alloc, old_alloc, new_alloc,
             rel_old = cat_old / scope_old_total * 100 if scope_old_total else 0.0
             rel_new = cat_new / scope_new_total * 100 if scope_new_total else 0.0
 
+            tickers_str = ", ".join(cat_tickers)
             print(
-                "%9s    %10.2f     %4s          %5.2f            %5.2f               %5.2f"
-                % (category, cat_amount, currency, rel_old, rel_new, target_pct)
+                "%9s   %-24s  %10.2f     %4s          %5.2f            %5.2f               %5.2f"
+                % (category, tickers_str, cat_amount, currency, rel_old, rel_new, target_pct)
             )
 
         print("")
@@ -83,20 +84,21 @@ def _print_report(targets_info, metadata, flat_alloc, old_alloc, new_alloc,
     # --- Per-ticker table ---
     print("")
     print(
-        " Ticker      Ask     Quantity      Amount    Currency     Old allocation   New allocation     Target allocation"
+        " Ticker   Description                          Ask     Quantity      Amount    Currency     Old allocation   New allocation     Target allocation"
     )
     print(
-        "                      to buy         ($)                      (%)              (%)                 (%)"
+        "                                                        to buy         ($)                      (%)              (%)                 (%)"
     )
     print(
-        "---------------------------------------------------------------------------------------------------------------"
+        "------------------------------------------------------------------------------------------------------------------------------------------------"
     )
     for ticker in portfolio.assets:
+        desc = metadata.get(ticker, {}).get("Description", "")
         cost_t = new_units[ticker] * prices[ticker][0]
         print(
-            "%8s  %7.2f   %7.3f        %8.2f     %4s          %5.2f            %5.2f               %5.2f"
+            "%8s   %-32s  %7.2f   %7.3f        %8.2f     %4s          %5.2f            %5.2f               %5.2f"
             % (
-                ticker, prices[ticker][0], new_units[ticker], cost_t,
+                ticker, desc, prices[ticker][0], new_units[ticker], cost_t,
                 prices[ticker][1], old_alloc[ticker], new_alloc[ticker],
                 flat_alloc[ticker],
             )
