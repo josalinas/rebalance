@@ -33,76 +33,75 @@ def _print_report(targets_info, metadata, flat_alloc, old_alloc, new_alloc,
                   new_units, prices, exchange_history, max_diff, portfolio):
     """Print per-target summary tables followed by the per-ticker table."""
 
-    # --- Per-target summary tables ---
+    # --- Pre-compute summary table rows to find max tickers width ---
+    summary_data = []
+    tw = len("Tickers")  # minimum column width
     for name, constraint, allocations in targets_info:
         group_column = constraint[-1]
         scope_tickers = _tickers_in_scope(constraint, metadata)
-
-        # Total scope allocation (for normalising to relative %).
         scope_old_total = sum(old_alloc.get(t, 0.0) for t in scope_tickers)
         scope_new_total = sum(new_alloc.get(t, 0.0) for t in scope_tickers)
-
-        print("")
-        print(f"  {name}  --  Constraint: {constraint}")
-        print(
-            " Category   Tickers                      Amount    Currency    Old allocation   New allocation     Target allocation"
-        )
-        print(
-            "                                            ($)                      (%)              (%)                 (%)"
-        )
-        print(
-            "--------------------------------------------------------------------------------------------------------------------"
-        )
-
+        rows = []
         for category, target_pct in allocations.items():
-            # Tickers in this category.
             cat_tickers = [
                 t for t in scope_tickers
                 if metadata[t].get(group_column) == category
             ]
-
             cat_amount = sum(
                 new_units.get(t, 0.0) * prices[t][0] for t in cat_tickers
             )
             currency = prices[cat_tickers[0]][1] if cat_tickers else ""
-
             cat_old = sum(old_alloc.get(t, 0.0) for t in cat_tickers)
             cat_new = sum(new_alloc.get(t, 0.0) for t in cat_tickers)
-
-            # Convert to relative % within scope.
             rel_old = cat_old / scope_old_total * 100 if scope_old_total else 0.0
             rel_new = cat_new / scope_new_total * 100 if scope_new_total else 0.0
-
             tickers_str = ", ".join(cat_tickers)
-            print(
-                "%9s   %-24s  %10.2f     %4s          %5.2f            %5.2f               %5.2f"
-                % (category, tickers_str, cat_amount, currency, rel_old, rel_new, target_pct)
-            )
+            tw = max(tw, len(tickers_str))
+            rows.append((category, tickers_str, cat_amount, currency,
+                         rel_old, rel_new, target_pct))
+        summary_data.append((name, constraint, rows))
 
+    # --- Print summary tables ---
+    tail = "  %10s     %4s    %14s   %14s     %17s" % (
+        "Amount", "Curr", "Old allocation", "New allocation", "Target allocation")
+    tail2 = "  %10s     %4s    %14s   %14s     %17s" % (
+        "($)", "", "(%)", "(%)", "(%)")
+    for name, constraint, rows in summary_data:
+        hdr = " %9s   %-*s" % ("Category", tw, "Tickers")
+        print(f"\n  {name}  --  Constraint: {constraint}")
+        print(hdr + tail)
+        print(" " * len(hdr) + tail2)
+        print("-" * (len(hdr) + len(tail)))
+        for cat, tstr, amt, cur, ro, rn, tgt in rows:
+            print("%9s   %-*s  %10.2f     %4s    %14.2f   %14.2f     %17.2f"
+                  % (cat, tw, tstr, amt, cur, ro, rn, tgt))
         print("")
 
-    # --- Per-ticker table ---
-    print("")
-    print(
-        " Ticker   Description                          Ask     Quantity      Amount    Currency     Old allocation   New allocation     Target allocation"
-    )
-    print(
-        "                                                        to buy         ($)                      (%)              (%)                 (%)"
-    )
-    print(
-        "------------------------------------------------------------------------------------------------------------------------------------------------"
-    )
+    # --- Pre-compute ticker table rows to find max description width ---
+    dw = len("Description")
+    ticker_data = []
     for ticker in portfolio.assets:
         desc = metadata.get(ticker, {}).get("Description", "")
+        dw = max(dw, len(desc))
         cost_t = new_units[ticker] * prices[ticker][0]
-        print(
-            "%8s   %-32s  %7.2f   %7.3f        %8.2f     %4s          %5.2f            %5.2f               %5.2f"
-            % (
-                ticker, desc, prices[ticker][0], new_units[ticker], cost_t,
-                prices[ticker][1], old_alloc[ticker], new_alloc[ticker],
-                flat_alloc[ticker],
-            )
-        )
+        ticker_data.append((ticker, desc, prices[ticker][0],
+                            new_units[ticker], cost_t, prices[ticker][1],
+                            old_alloc[ticker], new_alloc[ticker],
+                            flat_alloc[ticker]))
+
+    # --- Print ticker table ---
+    tail_t = "  %7s   %7s        %8s     %4s    %14s   %14s     %17s" % (
+        "Ask", "Qty", "Amount", "Curr", "Old allocation", "New allocation", "Target allocation")
+    tail_t2 = "  %7s   %7s        %8s     %4s    %14s   %14s     %17s" % (
+        "", "to buy", "($)", "", "(%)", "(%)", "(%)")
+    hdr_t = " %8s   %-*s" % ("Ticker", dw, "Description")
+    print("")
+    print(hdr_t + tail_t)
+    print(" " * len(hdr_t) + tail_t2)
+    print("-" * (len(hdr_t) + len(tail_t)))
+    for tk, desc, ask, qty, cost, cur, oa, na, ta in ticker_data:
+        print("%8s   %-*s  %7.2f   %7.3f        %8.2f     %4s    %14.2f   %14.2f     %17.2f"
+              % (tk, dw, desc, ask, qty, cost, cur, oa, na, ta))
 
     print("")
     print(
